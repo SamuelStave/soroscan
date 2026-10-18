@@ -231,30 +231,32 @@ export class WebSocketClient {
 
   /**
    * Send a subscription message to the server.
+   * Buffers the message if not connected and flushes on reconnect.
    */
   subscribe(filter?: EventFilter): void {
-    if (!this.isConnected()) {
-      throw new Error("WebSocket is not connected");
-    }
-
     const message = {
       type: "subscribe",
       filter: filter || {},
     };
 
-    this.ws!.send(JSON.stringify(message));
+    this.sendMessage(JSON.stringify(message));
   }
 
   /**
    * Send an unsubscribe message to the server.
+   * Buffers the message if not connected and flushes on reconnect.
    */
   unsubscribe(): void {
-    if (!this.isConnected()) {
-      return;
-    }
-
     const message = { type: "unsubscribe" };
-    this.ws!.send(JSON.stringify(message));
+    this.sendMessage(JSON.stringify(message));
+  }
+
+  /**
+   * Send a message, buffering if not connected.
+   * Public method for sending custom messages.
+   */
+  send(message: unknown): void {
+    this.sendMessage(JSON.stringify(message));
   }
 
   /**
